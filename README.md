@@ -1,17 +1,17 @@
 # code-path-2026
 AI Open Source Capstone
-# Contribution [#]: [Issue Title]
+# Contribution [#]: Open evaluator registry button links incorrectly
 
 **Contribution Number:** [1 / 2 / 3]  
-**Student:** [Your Name]  
-**Issue:** [GitHub issue link]  
-**Status:** [Phase I / Phase II / Phase III / Phase IV] [In Progress / Complete]
+**Student:** [Duke Gabriel]  
+**Issue:** [https://github.com/Agenta-AI/agenta/issues/4535]  
+**Status:** [Phase I Complete]
 
 ---
 
 ## Why I Chose This Issue
 
-[1-2 paragraphs explaining why this issue interests you, how it matches your skills/learning goals, what you hope to learn]
+I choose this issue because it seems interesting and it seems related to UI which is familiar but still a learning curve that I'm interested in.
 
 ---
 
