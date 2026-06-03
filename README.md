@@ -13,6 +13,10 @@ AI Open Source Capstone
 
 I choose this issue because it seems interesting and it seems related to UI which is familiar but still a learning curve that I'm interested in.
 
+From reading the issue thread, I understand the current problem is that there is an invalid link or incorrect routing for the link in question. My contribution will fix the link and route the user to the expected destination.
+
+Left a comment on the issue introducing myself — awaiting maintainer to confirm if the issue is still open. Will update this part once I hear back.
+
 ---
 
 ## Understanding the Issue
