@@ -5,7 +5,7 @@ AI Open Source Capstone
 **Contribution Number:** [1 / 2 / 3]  
 **Student:** [Duke Gabriel]  
 **Issue:** [https://github.com/Agenta-AI/agenta/issues/4535]  
-**Status:** [Phase I Complete]
+**Status:** [Phase II Complete]
 
 ---
 
@@ -23,19 +23,27 @@ Left a comment on the issue introducing myself — awaiting maintainer to confir
 
 ### Problem Description
 
-[In your own words, what's broken or missing?]
+The Evaluator Details Popover does not correctly handle navigation for automatic evaluators. Instead of opening the evaluator playground using the latest published revision, the component can generate navigation targets using the workflow ID. Additionally, when an automatic evaluator has no published revision, the component may still attempt to render a navigation button that relies on a null navigation target, resulting in broken navigation or runtime errors. The UI also uses an incorrect button label that references the evaluator registry, which is intended for human evaluators rather than automatic evaluators.
 
 ### Expected Behavior
 
-[What should happen?]
+When a user opens the Evaluator Details Popover:
+
+Automatic evaluators should display an "Open evaluator playground" button.
+The navigation URL should be generated using the evaluator's latest published revision ID.
+If no published revision exists, the button should be disabled and provide a clear explanation to the user (for example, a tooltip indicating that no published revision is available).
+Human evaluators should continue to display an "Open evaluator registry" button and navigate to the evaluator registry as they do today.
 
 ### Current Behavior
 
-[What actually happens?]
+Automatic evaluators can generate navigation targets using the workflow ID instead of the latest published revision ID.
+When latestRevisionId is null, the component can still attempt to access target.href, creating an invalid navigation state and potentially causing runtime errors.
+Automatic evaluators display the label "Open evaluator registry", which does not accurately reflect the destination users should be taken to.
+Navigation behavior may be unreliable due to the current router.push() implementation interacting with drawer close events.
 
 ### Affected Components
 
-[Which parts of the codebase are involved?]
+web/oss/src/components/SharedDrawers/TraceDrawer/components/EvaluatorDetailsPopover.tsx
 
 ---
 
@@ -43,19 +51,18 @@ Left a comment on the issue introducing myself — awaiting maintainer to confir
 
 ### Environment Setup
 
-[Notes on setting up your local development environment - challenges you faced, how you solved them]
+I set this up via the agenta Cloud versus the self hosted option, cloned the forked version onto my local machine.
 
 ### Steps to Reproduce
 
-1. [Step 1]
-2. [Step 2]
-3. [Observed result]
+1. Open a trace containing evaluator results.
+2. Hover over an automatic evaluator to open the Evaluator Details Popover.
+3. Click the "Open evaluator registry" button.
+4. Observe the generated navigation URL, opens random playground
 
 ### Reproduction Evidence
 
-- **Commit showing reproduction:** [Link to commit in your fork]
-- **Screenshots/logs:** [If applicable]
-- **My findings:** [What you discovered during reproduction]
+Link to my video of reproduction: https://github.com/Agenta-AI/agenta/issues/4535#issuecomment-4676006568
 
 ---
 
@@ -63,30 +70,120 @@ Left a comment on the issue introducing myself — awaiting maintainer to confir
 
 ### Analysis
 
-[Your analysis of the root cause - what's causing the issue?]
+The issue occurs because automatic evaluators build navigation targets using workflow information instead of the latest published revision ID, and the component does not safely handle cases where latestRevisionId is null. As a result, users can be directed to incorrect URLs or encounter broken navigation when no published revision exists.
 
 ### Proposed Solution
 
-[High-level description of your fix approach]
+Update the popover component to use the latest published revision ID when generating navigation targets for automatic evaluators and prevent navigation when no revision is available. The UI will also be updated to display the correct button label ("Open evaluator playground") and provide a disabled state with a tooltip when navigation is unavailable.
 
 ### Implementation Plan
 
 Using UMPIRE framework (adapted):
 
-**Understand:** [Restate the problem]
+**Understand:** 
 
-**Match:** [What similar patterns/solutions exist in the codebase?]
+The Evaluator Details Popover should provide navigation appropriate to the evaluator type.
 
-**Plan:** [Step-by-step implementation plan]
-1. [Modify file X to do Y]
-2. [Add function Z]
-3. [Update tests]
+Currently:
 
-**Implement:** [Link to your branch/commits as you work]
+Automatic evaluators are intended to open the evaluator playground.
+Human evaluators are intended to open the evaluator registry.
 
-**Review:** [Self-review checklist - does it follow the project's contribution guidelines?]
+The existing implementation incorrectly handles automatic evaluators by:
 
-**Evaluate:** [How will you verify it works?]
+Building navigation using the workflow ID instead of the latest revision ID.
+Rendering navigation controls when no revision exists.
+Displaying an incorrect button label ("Open evaluator registry") for automatic evaluators.
+
+As a result, users may be sent to the wrong destination or encounter broken navigation.
+
+**Match:** 
+
+similar navigation pattern already exists within the evaluator navigation utilities:
+
+buildEvaluatorTarget(...)
+
+This helper is responsible for generating destination URLs based on evaluator metadata.
+
+The existing codebase already distinguishes between human and automatic evaluators through:
+
+flags.is_feedback
+
+and
+
+meta.is_feedback
+
+This distinction can be reused to determine the correct navigation destination and button behavior.
+
+**Plan:** 
+
+1. Retrieve the Latest Published Revision
+
+Use:
+
+workflowLatestRevisionIdAtomFamily(...)
+
+to obtain the most recent published revision ID for automatic evaluators.
+
+2. Build Navigation Using Revision IDs
+
+For automatic evaluators:
+
+Replace the workflow ID with the latest revision ID before calling:
+buildEvaluatorTarget(...)
+
+This ensures URLs point directly to the evaluator playground revision.
+
+3. Handle Missing Revisions Safely
+
+If:
+
+latestRevisionId === null
+
+then:
+
+Do not create a navigation target.
+Render a disabled button.
+Display a tooltip explaining that no published revision is available.
+4. Correct User-Facing Labels
+
+Update button text:
+
+Human evaluator → "Open evaluator registry"
+Automatic evaluator → "Open evaluator playground"
+5. Simplify Navigation
+
+Replace the existing router.push() approach with native button navigation using:
+
+href={target.href}
+
+This removes dependency on drawer state and avoids race conditions between navigation and drawer closing behavior.
+
+**Implement:** 
+
+Link to my working branch: https://github.com/dukegabe/agenta/tree/fix-issue-4535
+
+**Review:** 
+
+1. Review project contribution guidelines.
+2. Verify linting passes.
+3. Confirm TypeScript types remain valid.
+4. Ensure no regressions for human evaluator behavior.
+5. Verify UI consistency with existing Ant Design patterns.
+6. Confirm navigation works correctly when drawers are opened and closed.
+
+**Evaluate:** 
+
+Manual Testing? 
+
+One example test case is the follwing: Automatic Evaluator With Published Revision
+
+Expected:
+
+Button text shows:
+"Open evaluator playground"
+URL contains revision ID.
+Navigation succeeds.
 
 ---
 
