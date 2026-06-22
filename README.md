@@ -5,7 +5,7 @@ AI Open Source Capstone
 **Contribution Number:** [1 / 2 / 3]  
 **Student:** [Duke Gabriel]  
 **Issue:** [https://github.com/Agenta-AI/agenta/issues/4535]  
-**Status:** [Phase II Complete]
+**Status:** [Phase III Complete]
 
 ---
 
@@ -189,6 +189,12 @@ Navigation succeeds.
 
 ## Testing Strategy
 
+Review strategy for testing Agenta AI by following this documentation here: https://agenta.ai/docs/contributing/guides/testing
+
+More testing information is found here: https://github.com/Agenta-AI/agenta/blob/main/docs/designs/testing/README.md
+
+Will need to get together with AI301 Build/Test Slack channel to get some help and understand which option to choose for testing but I am leaning towards "Web".
+
 ### Unit Tests
 
 - [ ] Test case 1: [Description]
@@ -208,9 +214,33 @@ Navigation succeeds.
 
 ## Implementation Notes
 
-### Week [X] Progress
+### Week [3] Progress
 
-[What you built this week, challenges faced, decisions made]
+Modified:
+
+web/oss/src/components/SharedDrawers/TraceDrawer/components/EvaluatorDetailsPopover.tsx
+
+Key changes:
+
+Added revision-aware navigation for automatic evaluators by retrieving the latest published revision ID from workflowLatestRevisionIdAtomFamily.
+
+Updated navigation target generation to use the revision ID instead of the workflow ID when opening the evaluator playground.
+
+Added null-safe handling for cases where no published revision exists.
+
+Replaced the automatic evaluator button label from "Open evaluator registry" to "Open evaluator playground".
+
+Added a disabled button state and tooltip when navigation is unavailable due to a missing published revision.
+
+Simplified navigation by using the button's native href attribute instead of the existing router.push() pattern.
+
+Design Decisions:
+
+Chose to treat latestRevisionId === null as a non-navigable state because the atom contract indicates null represents either a loading state or the absence of a published revision.
+
+Preserved existing behavior for human evaluators to minimize regression risk.
+
+Used conditional rendering rather than fallback URLs to avoid sending users to incorrect destinations.
 
 ### Week [Y] Progress
 
